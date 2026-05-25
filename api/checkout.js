@@ -1,5 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+const TELEGRAM_BOT_TOKEN = '8767199626:AAFSU1s7-jIcXV7MkOpCoUOHbP66qS__8DI';
+const TELEGRAM_CHAT_ID = '774478570';
+
 module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -102,7 +105,35 @@ cancel_url: 'https://dogmawinebar.com',
         party_size: partySize
       }
     });
+// Send Telegram notification
+    const telegramMessage = `🍷 *NOVA RESERVA!*
 
+*Tasting:* ${tastingName}
+*Preço:* €${price} × ${partySize} pessoas
+
+👤 *Guest:*
+Nome: ${guestName}
+Email: ${guestEmail}
+Phone: ${guestPhone}
+
+📅 *Detalhes:*
+Data: ${bookingDate}
+Hora: ${bookingTime}
+Pessoas: ${partySize}`;
+
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: telegramMessage,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (err) {
+      console.log('Telegram notification error (non-blocking):', err.message);
+    }
     res.status(200).json({ sessionId: session.id, url: session.url });
   } catch (err) {
     console.error('Stripe error:', err);
