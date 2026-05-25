@@ -90,8 +90,8 @@ module.exports = async (req, res) => {
           }
         }
       ],
-      success_url: 'https://dogmawinebar.com/success',
-cancel_url: 'https://dogmawinebar.com/cancel',
+      success_url: 'https://dogmawinebar.com',
+cancel_url: 'https://dogmawinebar.com',
       metadata: {
         guest_name: guestName,
         guest_email: guestEmail,
