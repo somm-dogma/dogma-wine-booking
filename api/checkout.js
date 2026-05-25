@@ -114,8 +114,8 @@ module.exports = async (req, res) => {
           }
         }
       ],
-      success_url: `${process.env.DOMAIN}/success`,
-      cancel_url: `${process.env.DOMAIN}/cancel`,
+      success_url: 'https://dogmawinebar.com/success',
+cancel_url: 'https://dogmawinebar.com/cancel',
       metadata: {
         guest_name: guestName,
         guest_email: guestEmail,
