@@ -54,30 +54,6 @@ module.exports = async (req, res) => {
       customer_email: guestEmail,
       custom_fields: [
         {
-          key: 'guest_name',
-          label: {
-            type: 'custom',
-            custom: 'Guest Name'
-          },
-          type: 'text',
-          optional: false,
-          text: {
-            default_value: guestName
-          }
-        },
-        {
-          key: 'guest_phone',
-          label: {
-            type: 'custom',
-            custom: 'Phone'
-          },
-          type: 'text',
-          optional: false,
-          text: {
-            default_value: guestPhone
-          }
-        },
-        {
           key: 'booking_date',
           label: {
             type: 'custom',
