@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm install",
+  "env": {
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "DOMAIN": "https://dogmawinebar.com"
+  }
+}

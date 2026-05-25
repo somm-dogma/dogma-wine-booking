@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOGMA — Reserve Wine Tasting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --burgundy: #6B0F1A;
+    --cream: #FFF8E7;
+    --text: #333333;
+    --border: #E8DDD0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .reserve-btn-wrapper {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .open-btn {
+    background: var(--burgundy);
+    color: white;
+    border: none;
+    padding: 18px 56px;
+    font-family: 'EB Garamond', serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .open-btn:hover {
+    background: #4a0a12;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal-box {
+    background: var(--cream);
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 50px;
+    position: relative;
+  }
+
+  .close-x {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    z-index: 10;
+  }
+
+  .title {
+    font-family: 'EB Garamond', serif;
+    font-size: 42px;
+    color: var(--burgundy);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #999;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .tasting-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .tasting-item {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .tasting-item:hover { border-color: var(--burgundy); }
+
+  .tasting-item input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .tasting-item input[type="radio"]:checked {
+    border-color: var(--burgundy);
+    background: var(--burgundy);
+    box-shadow: inset 0 0 0 3px white;
+  }
+
+  .tasting-text {
+    flex: 1;
+  }
+
+  .tasting-text-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    color: var(--burgundy);
+    margin-bottom: 2px;
+  }
+
+  .tasting-text-price {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .input-row.full { grid-template-columns: 1fr; }
+
+  .input-group label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: white;
+    padding: 13px 14px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .input-group input:focus,
+  .input-group select:focus {
+    border-color: var(--burgundy);
+  }
+
+  .notice {
+    background: #fef5f5;
+    border-left: 3px solid var(--burgundy);
+    padding: 16px;
+    margin: 24px 0;
+    font-size: 13px;
+    font-style: italic;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  .summary {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 24px 0;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .summary-row.total {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 12px;
+    margin-bottom: 0;
+    font-family: 'EB Garamond', serif;
+    font-size: 18px;
+    color: var(--burgundy);
+    font-weight: 500;
+  }
+
+  .pay-btn {
+    width: 100%;
+    background: var(--burgundy);
+    color: white;
+    border: none;
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+
+  .pay-btn:hover { background: #4a0a12; }
+
+  .pay-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .err {
+    background: #fff5f0;
+    color: #c44536;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    border-left: 3px solid #c44536;
+    display: none;
+  }
+
+  .err.show { display: block; }
+
+  @media (max-width: 600px) {
+    .modal-box { padding: 30px 24px; }
+    .input-row { grid-template-columns: 1fr; }
+    .title { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reserve-btn-wrapper">
+  <button class="open-btn" onclick="openForm()">Reserve Your Tasting</button>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <button class="close-x" onclick="closeForm()">✕</button>
+    
+    <h1 class="title">Reserve</h1>
+    <p class="subtitle">Wine Tasting Experience</p>
+
+    <div class="err" id="errBox"></div>
+
+    <form id="form" onsubmit="submitForm(event)">
+      
+      <div class="section">
+        <div class="section-label">Choose Your Tasting</div>
+        <div class="tasting-list">
+          
+          <label class="tasting-item">
+            <input type="radio" name="t" 
+              data-id="test-tasting"
+              data-price="0" 
+              data-name="Test Tasting" 
+              onchange="recalc()">
+            <div class="tasting-text">
+              <div class="tasting-text-name">Test Tasting</div>
+              <div class="tasting-text-price">€0 (testing only)</div>
+            </div>
+          </label>
+
+          <label class="tasting-item">
+            <input type="radio" name="t" 
+              data-id="vinho-verde"
+              data-price="51" 
+              data-name="Vinho Verde — Beyond Expectations" 
+              onchange="recalc()">
+            <div class="tasting-text">
+              <div class="tasting-text-name">Vinho Verde — Beyond Expectations</div>
+              <div class="tasting-text-price">€51 per person</div>
+            </div>
+          </label>
+
+          <label class="tasting-item">
+            <input type="radio" name="t" 
+              data-id="top-wines"
+              data-price="75" 
+              data-name="TOP Wines of Portugal" 
+              onchange="recalc()">
+            <div class="tasting-text">
+              <div class="tasting-text-name">TOP Wines of Portugal</div>
+              <div class="tasting-text-price">€75 per person</div>
+            </div>
+          </label>
+
+          <label class="tasting-item">
+            <input type="radio" name="t" 
+              data-id="icons"
+              data-price="99" 
+              data-name="Icons of Portugal" 
+              onchange="recalc()">
+            <div class="tasting-text">
+              <div class="tasting-text-name">Icons of Portugal</div>
+              <div class="tasting-text-price">€99 per person</div>
+            </div>
+          </label>
+
+          <label class="tasting-item">
+            <input type="radio" name="t" 
+              data-id="ports"
+              data-price="210" 
+              data-name="Ports from Heaven" 
+              onchange="recalc()">
+            <div class="tasting-text">
+              <div class="tasting-text-name">Ports from Heaven</div>
+              <div class="tasting-text-price">€210 per person</div>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Your Details</div>
+        <div class="input-row full">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="iName" required>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="iEmail" required>
+          </div>
+          <div class="input-group">
+            <label>Phone</label>
+            <input type="tel" id="iPhone" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">When</div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Date</label>
+            <input type="date" id="iDate" required onchange="checkSunday()">
+          </div>
+          <div class="input-group">
+            <label>Time</label>
+            <select id="iTime" required>
+              <option value="">Select</option>
+              <option>16:00</option><option>16:30</option>
+              <option>17:00</option><option>17:30</option>
+              <option>18:00</option><option>18:30</option>
+              <option>19:00</option><option>19:30</option>
+              <option>20:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-row full">
+          <div class="input-group">
+            <label>Party Size</label>
+            <select id="iParty" required onchange="recalc()">
+              <option value="">Select</option>
+              <option value="1">1 person</option>
+              <option value="2">2 people</option>
+              <option value="3">3 people</option>
+              <option value="4">4 people</option>
+              <option value="5">5 people</option>
+              <option value="6">6 people</option>
+              <option value="7">7 people</option>
+              <option value="8">8 people</option>
+              <option value="9">9 people</option>
+              <option value="10">10 people</option>
+              <option value="11">11 people</option>
+              <option value="12">12 people</option>
+              <option value="13">13 people</option>
+              <option value="14">14 people</option>
+              <option value="15">15 people</option>
+              <option value="16">16 people</option>
+              <option value="17">17 people</option>
+              <option value="18">18 people</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice">
+        Your reservation is pending verification. We personally check availability for your chosen date and time. You'll receive confirmation within 24 hours, or we'll suggest the perfect alternative.
+      </div>
+
+      <div class="summary">
+        <div class="summary-row">
+          <span>Price per person</span>
+          <span id="sPP">—</span>
+        </div>
+        <div class="summary-row">
+          <span>Number of guests</span>
+          <span id="sNG">—</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="sTotal">€0</span>
+        </div>
+      </div>
+
+      <button type="submit" class="pay-btn" id="payBtn">Pay & Reserve</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openForm() {
+  document.getElementById('modal').classList.add('active');
+  
+  // Set min date, skip Sunday if today is Sunday
+  var d = new Date();
+  if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+  var ds = d.toISOString().split('T')[0];
+  var di = document.getElementById('iDate');
+  di.min = ds;
+  di.value = ds;
+}
+
+function closeForm() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeForm();
+});
+
+function checkSunday() {
+  var di = document.getElementById('iDate');
+  var d = new Date(di.value + 'T00:00:00');
+  if (d.getDay() === 0) {
+    di.value = '';
+    showErr('Sundays are closed. Please choose another day.');
+  } else {
+    hideErr();
+  }
+}
+
+function recalc() {
+  var r = document.querySelector('input[name="t"]:checked');
+  var p = parseInt(document.getElementById('iParty').value) || 0;
+  
+  if (r && p > 0) {
+    var price = parseFloat(r.dataset.price);
+    var total = price * p;
+    document.getElementById('sPP').textContent = '€' + price;
+    document.getElementById('sNG').textContent = p;
+    document.getElementById('sTotal').textContent = '€' + total.toFixed(2);
+  } else {
+    document.getElementById('sPP').textContent = '—';
+    document.getElementById('sNG').textContent = '—';
+    document.getElementById('sTotal').textContent = '€0';
+  }
+}
+
+function showErr(m) {
+  var e = document.getElementById('errBox');
+  e.textContent = m;
+  e.classList.add('show');
+}
+
+function hideErr() {
+  document.getElementById('errBox').classList.remove('show');
+}
+
+const BACKEND_URL = 'https://dogma-wine-booking.vercel.app';
+
+async function submitForm(e) {
+  e.preventDefault();
+  
+  var r = document.querySelector('input[name="t"]:checked');
+  var name = document.getElementById('iName').value;
+  var email = document.getElementById('iEmail').value;
+  var phone = document.getElementById('iPhone').value;
+  var date = document.getElementById('iDate').value;
+  var time = document.getElementById('iTime').value;
+  var party = parseInt(document.getElementById('iParty').value);
+  
+  if (!r || !name || !email || !phone || !date || !time || !party) {
+    showErr('Please fill in all fields');
+    return false;
+  }
+  
+  var d = new Date(date + 'T00:00:00');
+  if (d.getDay() === 0) {
+    showErr('Sundays are closed. Please choose another day.');
+    return false;
+  }
+  
+  hideErr();
+  
+  var tName = r.dataset.name;
+  var tPrice = parseFloat(r.dataset.price);
+  var tId = r.dataset.id || tName.replace(/\s+/g, '-').toLowerCase();
+  
+  var btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating payment session...';
+  
+  try {
+    // Call backend to create Stripe Checkout Session
+    var response = await fetch(BACKEND_URL + '/api/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        tastingId: tId,
+        tastingName: tName,
+        price: tPrice,
+        guestName: name,
+        guestEmail: email,
+        guestPhone: phone,
+        bookingDate: date,
+        bookingTime: time,
+        partySize: party
+      })
+    });
+    
+    if (!response.ok) {
+      var errData = await response.json();
+      showErr('Error: ' + (errData.error || 'Could not create payment session'));
+      btn.disabled = false;
+      btn.textContent = 'Pay & Reserve';
+      return false;
+    }
+    
+    var data = await response.json();
+    console.log('Checkout session created:', data.sessionId);
+    
+    // Redirect to Stripe Checkout
+    window.location.href = data.url;
+    
+  } catch(err) {
+    console.error('Backend error:', err);
+    showErr('Error: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Pay & Reserve';
+  }
+  
+  return false;
+}
+</script>
+</body>
+</html>

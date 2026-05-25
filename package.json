@@ -1,0 +1,12 @@
+{
+  "name": "dogma-wine-booking",
+  "version": "1.0.0",
+  "description": "Dogma Wine Bar - Tasting Booking Backend",
+  "main": "api/checkout.js",
+  "dependencies": {
+    "stripe": "^14.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
