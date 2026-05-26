@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Dogma Wine Bar - Tasting Booking Backend",
   "main": "api/checkout.js",
-  "dependencies": {
-    "stripe": "^14.0.0"
-  },
+ "dependencies": {
+  "stripe": "^14.0.0",
+  "nodemailer": "^6.9.7"
+},
   "engines": {
   "node": "20.x"
 }
