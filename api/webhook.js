@@ -4,7 +4,6 @@ const nodemailer = require('nodemailer');
 const TELEGRAM_BOT_TOKEN = '8767199626:AAFSU1s7-jIcXV7MkOpCoUOHbP66qS__8DI';
 const TELEGRAM_CHAT_ID = '774478570';
 
-// Configure email
 const emailTransporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -14,6 +13,8 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 module.exports = async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -24,9 +25,11 @@ module.exports = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhook_secret);
+    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhook_secret);
   } catch (err) {
-    return res.status(400).json({ error: `Webhook signature verification failed.` });
+    console.log('Webhook error:', err.message);
+    return res.status(400).json({ error: err.message });
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -41,20 +44,7 @@ module.exports = async (req, res) => {
     const partySize = session.metadata.party_size;
     const amount = session.amount_total / 100;
 
-    // Send Telegram notification
-    const telegramMessage = `✅ *PAGAMENTO CONFIRMADO!*
-
-🍷 *${tastingName}*
-💶 €${amount}
-
-👤 *Guest:*
-${guestName}
-${guestEmail}
-${guestPhone}
-
-📅 *Data:* ${bookingDate}
-🕐 *Hora:* ${bookingTime}
-👥 *Pessoas:* ${partySize}`;
+    const telegramMessage = `✅ *PAGAMENTO CONFIRMADO!*\n🍷 *${tastingName}*\n💶 €${amount}\n\n👤 *Guest:*\n${guestName}\n${guestEmail}\n${guestPhone}\n\n📅 *Data:* ${bookingDate}\n🕐 *Hora:* ${bookingTime}\n👥 *Pessoas:* ${partySize}`;
 
     try {
       await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -70,21 +60,7 @@ ${guestPhone}
       console.log('Telegram error:', err.message);
     }
 
-    // Send confirmation email to guest
-    const emailHTML = `
-    <h2>Your Dogma Wine Tasting Reservation</h2>
-    <p>Hi ${guestName},</p>
-    <p>Your payment has been confirmed! Here are your booking details:</p>
-    <hr>
-    <p><strong>Tasting:</strong> ${tastingName}</p>
-    <p><strong>Date:</strong> ${bookingDate}</p>
-    <p><strong>Time:</strong> ${bookingTime}</p>
-    <p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p>
-    <p><strong>Total:</strong> €${amount}</p>
-    <hr>
-    <p>We look forward to welcoming you!</p>
-    <p>Dogma Wine Bar<br>Porto, Portugal</p>
-    `;
+    const emailHTML = `<h2>Your Dogma Wine Tasting Reservation</h2><p>Hi ${guestName},</p><p>Your payment has been confirmed! Here are your booking details:</p><hr><p><strong>Tasting:</strong> ${tastingName}</p><p><strong>Date:</strong> ${bookingDate}</p><p><strong>Time:</strong> ${bookingTime}</p><p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p><p><strong>Total:</strong> €${amount}</p><hr><p>We look forward to welcoming you!</p><p>Dogma Wine Bar<br>Porto, Portugal</p>`;
 
     try {
       await emailTransporter.sendMail({
@@ -93,6 +69,7 @@ ${guestPhone}
         subject: `Dogma Wine Tasting - Reservation Confirmed`,
         html: emailHTML
       });
+      console.log('Email sent to:', guestEmail);
     } catch (err) {
       console.log('Email error:', err.message);
     }
