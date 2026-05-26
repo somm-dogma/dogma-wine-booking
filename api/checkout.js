@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
           }
         }
       ],
-      success_url: `https://dogmawinebar.com/bookatasting?session_id={CHECKOUT_SESSION_ID}&success=true`,
+      success_url: `https://dogma-wine-booking.vercel.app/api/success?session_id={CHECKOUT_SESSION_ID}`,
 cancel_url: 'https://dogmawinebar.com',
       metadata: {
         guest_name: guestName,
