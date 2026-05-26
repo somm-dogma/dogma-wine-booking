@@ -93,7 +93,7 @@ module.exports = async (req, res) => {
           }
         }
       ],
-      success_url: 'https://dogmawinebar.com',
+      success_url: `https://dogmawinebar.com/bookatasting?session_id={CHECKOUT_SESSION_ID}&success=true`,
 cancel_url: 'https://dogmawinebar.com',
       metadata: {
         guest_name: guestName,
