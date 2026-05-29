@@ -13,8 +13,6 @@ const emailTransporter = nodemailer.createTransport({
 });
 
 module.exports = async (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -28,8 +26,8 @@ module.exports = async (req, res) => {
     const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
     event = stripe.webhooks.constructEvent(rawBody, sig, webhook_secret);
   } catch (err) {
-    console.log('Webhook error:', err.message);
-    return res.status(400).json({ error: err.message });
+    console.error('Webhook signature error:', err.message);
+    return res.status(200).json({ error: 'Signature verification failed' });
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -56,13 +54,14 @@ module.exports = async (req, res) => {
           parse_mode: 'Markdown'
         })
       });
+      console.log('Telegram sent');
     } catch (err) {
-      console.log('Telegram error:', err.message);
+      console.error('Telegram error:', err.message);
     }
 
-    const emailHTML = `<h2>Your Dogma Wine Tasting Reservation</h2><p>Hi ${guestName},</p><p>Your payment has been confirmed! Here are your booking details:</p><hr><p><strong>Tasting:</strong> ${tastingName}</p><p><strong>Date:</strong> ${bookingDate}</p><p><strong>Time:</strong> ${bookingTime}</p><p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p><p><strong>Total:</strong> €${amount}</p><hr><p>We look forward to welcoming you!</p><p>Dogma Wine Bar<br>Porto, Portugal</p>`;
-
     try {
+      const emailHTML = `<h2>Your Dogma Wine Tasting Reservation</h2><p>Hi ${guestName},</p><p>Your payment has been confirmed! Here are your booking details:</p><hr><p><strong>Tasting:</strong> ${tastingName}</p><p><strong>Date:</strong> ${bookingDate}</p><p><strong>Time:</strong> ${bookingTime}</p><p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p><p><strong>Total:</strong> €${amount}</p><hr><p>We look forward to welcoming you!</p><p>Dogma Wine Bar<br>Porto, Portugal</p>`;
+
       await emailTransporter.sendMail({
         from: process.env.EMAIL_USER,
         to: guestEmail,
@@ -71,7 +70,7 @@ module.exports = async (req, res) => {
       });
       console.log('Email sent to:', guestEmail);
     } catch (err) {
-      console.log('Email error:', err.message);
+      console.error('Email error:', err.message);
     }
   }
 
