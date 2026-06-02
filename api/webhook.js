@@ -1,8 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const nodemailer = require('nodemailer');
 
-const TELEGRAM_BOT_TOKEN = '8767199626:AAFSU1s7-jIcXV7MkOpCoUOHbP66qS__8DI';
-const TELEGRAM_CHAT_ID = '774478570';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 const emailTransporter = nodemailer.createTransport({
   service: 'gmail',
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-      const emailHTML = `<h2>Your Dogma Wine Tasting Reservation</h2><p>Hi ${guestName},</p><p>Your payment has been confirmed! Here are your booking details:</p><hr><p><strong>Tasting:</strong> ${tastingName}</p><p><strong>Date:</strong> ${bookingDate}</p><p><strong>Time:</strong> ${bookingTime}</p><p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p><p><strong>Total:</strong> €${amount}</p><hr><p>We look forward to welcoming you!</p><p>Dogma Wine Bar<br>Porto, Portugal</p>`;
+      const emailHTML = `<h2>Your Dogma Wine Tasting Reservation</h2><p>Hi ${guestName},</p><p>Your payment has been confirmed! Here are your booking details:</p><hr><p><strong>Tasting:</strong> ${tastingName}</p><p><strong>Date:</strong> ${bookingDate}</p><p><strong>Time:</strong> ${bookingTime}</p><p><strong>Party Size:</strong> ${partySize} person${partySize > 1 ? 's' : ''}</p><p><strong>Total:</strong> €${amount}</p><hr><p><strong>Contact:</strong> ${guestEmail}${guestPhone ? ` | ${guestPhone}` : ''}</p><p>We look forward to welcoming you!</p><p>Dogma Wine Bar<br>Porto, Portugal</p>`;
 
       await emailTransporter.sendMail({
         from: process.env.EMAIL_USER,
